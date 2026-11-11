@@ -1,6 +1,7 @@
 export type Channel = {
   id: string; name: string; service: string; timezone: string;
   quietHours: [number, number]; maxPerDay: number; minGapMinutes: number;
+  preferredHour?: number; // local hour to aim for, default 10
 };
 export type ExistingPost = { channelId: string; dueAt: string };
 export type DraftPost = { id: string; text: string; channelIds: string[]; topic?: string; notBefore?: string };
