@@ -23,7 +23,7 @@ Built for [Buffer Commit](https://buffer.com/api/commit). **Submit by Fri Nov 13
 - [x] Solver: quiet hours, daily cap, minimum gap, existing posts, locks, not-before, preferred hour
 - [x] `explainSlot` for click-to-explain
 - [x] Sample data and 13 tests
-- [ ] Deploy on Vercel and share the public URL (needed for the OAuth redirect)
+- [x] Deployed: https://tessera-lovat.vercel.app (OAuth redirect: /api/auth/callback)
 - [ ] Final README for judges, with a "Built during the contest window" section
 - [ ] Write-up and demo video
 - [ ] Submit as team captain, listing both members
