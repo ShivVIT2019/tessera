@@ -9,9 +9,9 @@ Built for [Buffer Commit](https://buffer.com/api/commit). **Submit by Fri Nov 13
 | File | What it does | Owner |
 |---|---|---|
 | `lib/types.ts` | Shared interface. Change only after agreeing. | Both |
-| `lib/solver.ts` | `solve(problem, locks)` places posts with reasons; `explainSlot(...)` says why a slot is allowed or not | Atchu |
-| `lib/sample.ts` | `sampleProblem()`: 3 channels, existing posts, 8 drafts | Atchu |
-| `lib/solver.test.ts` | Solver tests (`npm test`) | Atchu |
+| `lib/solver.ts` | `solve(problem, locks)` places posts with reasons; `explainSlot(...)` says why a slot is allowed or not | Atchyut  |
+| `lib/sample.ts` | `sampleProblem()`: 3 channels, existing posts, 8 drafts | Atchyut |
+| `lib/solver.test.ts` | Solver tests (`npm test`) | Atchyut |
 | `app/api/auth/*` | Login with Buffer (OAuth + PKCE) | Balaji |
 | `lib/buffer.ts` | Buffer GraphQL client | Balaji |
 | `app/*` | Inbox, Board, Apply/Undo screens | Balaji |
