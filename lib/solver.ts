@@ -101,3 +101,62 @@ export function solve(problem: Problem, locks: Lock[] = []): Plan {
   placements.sort((a, b) => a.dueAt.localeCompare(b.dueAt) || a.channelId.localeCompare(b.channelId));
   return { placements, unplaced };
 }
+
+export type SlotCheck = { ok: boolean; reasons: string[] };
+
+const pad = (h: number) => String(h).padStart(2, "0");
+
+export function explainSlot(
+  problem: Problem,
+  placements: Placement[],
+  channelId: string,
+  dueAt: string,
+  postId?: string,
+): SlotCheck {
+  const ch = problem.channels.find((c) => c.id === channelId);
+  if (!ch) return { ok: false, reasons: [`Unknown channel ${channelId}`] };
+
+  const t = utc(dueAt);
+  const local = t.setZone(ch.timezone);
+  const reasons: string[] = [];
+
+  const windowStart = utc(problem.start);
+  if (t < windowStart || t >= windowStart.plus({ days: problem.days })) {
+    reasons.push("Outside the planning window");
+  }
+
+  const draft = postId ? problem.drafts.find((d) => d.id === postId) : undefined;
+  if (draft && !draft.channelIds.includes(ch.id)) {
+    reasons.push(`"${draft.id}" isn't meant for ${ch.name}`);
+  }
+  if (draft?.notBefore && t < utc(draft.notBefore)) {
+    reasons.push(`"${draft.id}" can't go out before ${utc(draft.notBefore).setZone(ch.timezone).toFormat("ccc HH:mm")}`);
+  }
+
+  if (isQuiet(ch, local)) {
+    const [s, e] = ch.quietHours;
+    reasons.push(`${local.toFormat("HH:mm")} is in ${ch.name}'s quiet hours (${pad(s)}:00–${pad(e)}:00)`);
+  }
+
+  const others: Busy[] = [
+    ...problem.existing
+      .filter((p) => p.channelId === ch.id)
+      .map((p) => ({ channelId: ch.id, at: utc(p.dueAt), label: "an existing Buffer post" })),
+    ...placements
+      .filter((p) => p.channelId === ch.id && p.postId !== postId)
+      .map((p) => ({ channelId: ch.id, at: utc(p.dueAt), label: `post "${p.postId}"` })),
+  ];
+
+  const day = local.toISODate();
+  const sameDay = others.filter((b) => b.at.setZone(ch.timezone).toISODate() === day).length;
+  if (sameDay >= ch.maxPerDay) {
+    reasons.push(`${ch.name} already has ${sameDay} post${sameDay === 1 ? "" : "s"} on ${local.toFormat("cccc")} (limit ${ch.maxPerDay})`);
+  }
+
+  for (const b of others) {
+    const d = Math.abs(b.at.diff(t, "minutes").minutes);
+    if (d < ch.minGapMinutes) reasons.push(`Only ${hours(d)} from ${b.label} (needs ${hours(ch.minGapMinutes)})`);
+  }
+
+  return { ok: reasons.length === 0, reasons };
+}

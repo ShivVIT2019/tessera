@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DateTime } from "luxon";
-import { solve } from "./solver";
+import { explainSlot, solve } from "./solver";
 import type { Problem } from "./types";
 
 const problem: Problem = {
@@ -80,5 +80,34 @@ describe("solve", () => {
     const result = solve(full);
     expect(result.placements).toEqual([]);
     expect(result.unplaced.length).toBeGreaterThan(0);
+  });
+});
+
+describe("explainSlot", () => {
+  const plan = solve(problem);
+  const why = (channelId: string, dueAt: string, postId?: string, prob: Problem = problem) =>
+    explainSlot(prob, plan.placements, channelId, dueAt, postId);
+
+  it("accepts every slot the solver chose", () => {
+    for (const p of plan.placements) expect(why(p.channelId, p.dueAt, p.postId)).toEqual({ ok: true, reasons: [] });
+  });
+
+  it("rejects quiet hours", () => {
+    const r = why("li", "2026-11-17T03:00:00Z");
+    expect(r.ok).toBe(false);
+    expect(r.reasons.join(" ")).toMatch(/quiet hours/);
+  });
+
+  it("rejects slots too close to an existing post", () => {
+    expect(why("li", "2026-11-16T15:00:00Z").reasons.join(" ")).toMatch(/from an existing Buffer post/);
+  });
+
+  it("rejects a full day", () => {
+    const strict = { ...problem, channels: problem.channels.map((c) => (c.id === "li" ? { ...c, maxPerDay: 1 } : c)) };
+    expect(why("li", "2026-11-16T20:00:00Z", undefined, strict).reasons.join(" ")).toMatch(/limit 1/);
+  });
+
+  it("rejects channels the post isn't meant for", () => {
+    expect(why("li", "2026-11-18T15:00:00Z", "p0").reasons.join(" ")).toMatch(/isn't meant for LinkedIn/);
   });
 });
