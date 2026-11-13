@@ -1,4 +1,5 @@
 import { DateTime } from "luxon";
+import { defaultRules } from "./rules";
 import type { Problem } from "./types";
 
 export function sampleProblem(now = DateTime.utc()): Problem {
@@ -9,9 +10,9 @@ export function sampleProblem(now = DateTime.utc()): Problem {
     start: start.toISO()!,
     days: 7,
     channels: [
-      { id: "li", name: "LinkedIn", service: "linkedin", timezone: "America/New_York", quietHours: [20, 8], maxPerDay: 1, minGapMinutes: 240 },
-      { id: "x", name: "X", service: "twitter", timezone: "America/New_York", quietHours: [23, 7], maxPerDay: 3, minGapMinutes: 120 },
-      { id: "bsky", name: "Bluesky", service: "bluesky", timezone: "Europe/London", quietHours: [22, 7], maxPerDay: 2, minGapMinutes: 180 },
+      { id: "li", name: "LinkedIn", service: "linkedin", goldenWindows: defaultRules("linkedin").goldenWindows, timezone: "America/New_York", quietHours: [20, 8], maxPerDay: 1, minGapMinutes: 240 },
+      { id: "x", name: "X", service: "twitter", goldenWindows: defaultRules("twitter").goldenWindows, timezone: "America/New_York", quietHours: [23, 7], maxPerDay: 3, minGapMinutes: 120 },
+      { id: "bsky", name: "Bluesky", service: "bluesky", goldenWindows: defaultRules("bluesky").goldenWindows, timezone: "Europe/London", quietHours: [22, 7], maxPerDay: 2, minGapMinutes: 180 },
     ],
     existing: [
       { channelId: "li", dueAt: at(0, 14) },
